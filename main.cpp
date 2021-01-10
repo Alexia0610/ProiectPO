@@ -1,91 +1,53 @@
 #include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
-#include "tabel.h"
+#include "query.h"
 #include "baza_de_date.h"
-#include "index.h"
+#include "tabel.h"
+#include "vector"
+#include "string"
 
 using namespace std;
 
-string eliminaSpatii(const string &str, const string &whitespace = " \t")
-{
-  const auto inceput = str.find_first_not_of(whitespace);
+vector<string> fisiereStructuraExistenta = {"./fisiere_input/structura_existenta/studenti.txt"};
 
-  if (inceput == string::npos)
-    return "";
-
-  const auto sfarsit = str.find_last_not_of(whitespace);
-  const auto sfarsitNou = sfarsit - inceput + 1;
-
-  return str.substr(inceput, sfarsitNou);
-}
-
-vector<string> delimiteaza(const string &s, char delim)
-{
-  vector<string> qs;
-  stringstream ss(s);
-  string query;
-
-  while (getline(ss, query, delim))
-  {
-    string q = eliminaSpatii(query);
-
-    if (!q.empty())
-      qs.push_back(q);
+int main(int argc, char *argv[]) {
+  if (argc > 6) {
+    cout << "Numarul de nume de fisiere trimise ca argument nu trebuie sa depaseasca un total de 5\n";
   }
 
-  return qs;
-}
+  BazaDeDate clasaDeStudenti = BazaDeDate("clasa_de_studenti");
 
-int main()
-{
+  for (int i = 0; i < fisiereStructuraExistenta.size(); i++) {
+    vector<string> bucatiLocatieFisier = Utile::delimiteaza(fisiereStructuraExistenta[i], '/');
+    string numeFisier = Utile::delimiteaza(bucatiLocatieFisier[bucatiLocatieFisier.size() - 1], '.')[0];
+
+    clasaDeStudenti.adaugaTabel(new Tabel(numeFisier, fisiereStructuraExistenta[i]));
+  }
+
   string input;
 
-  cout << "Introduceti query-uri SQL delimitate de ; sau o noua linie\n";
+  for (int i = 1; i < argc; i++) {
+    string numeFisier = argv[i];
 
-  while (getline(cin, input))
-  {
+    ifstream fisierInstructiuni(numeFisier);
+
+    if (!fisierInstructiuni.is_open()) {
+      cout << "Fisierul " + numeFisier + " nu poate fi citit\n";
+    }
+
+    string queryuri;
+
+    while (getline(fisierInstructiuni, queryuri)) {
+      Query::parseazaQueryuri(clasaDeStudenti, queryuri);
+    }
+  }
+
+  cout << "Introduceti query-uri SQL delimitate de \";\" sau o noua linie\n";
+
+  while (getline(cin, input)) {
     if (input.empty())
       cout << "Trebuie sa introduceti un SQL query valid!\n";
 
-    vector<string> queryuri = delimiteaza(input, ';');
-
-    for (auto query : queryuri)
-    {
-      transform(query.begin(), query.end(), query.begin(), ::tolower);
-      
-      string comandaQuery = query.substr(0, input.find(" "));
-
-      if (comandaQuery == "create") {
-        string obiectQuery = query.substr(comandaQuery.size() + 1, input.find(" "));
-
-        if (obiectQuery == "database")
-          BazaDeDate::Create(query);
-        else if (obiectQuery == "table")
-          Tabel::Create(query);
-      }
-      else if (comandaQuery == "drop") {
-        string obiectQuery = query.substr(comandaQuery.size() + 1, input.find(" "));
-
-        if (obiectQuery == "index")
-          Index::Drop(query);
-        else if (obiectQuery == "table")
-          Tabel::Drop(query);
-      }
-      else if (comandaQuery == "display")
-        Tabel::Display(query);
-      else if (comandaQuery == "insert")
-        Tabel::Insert(query);
-      else if (comandaQuery == "delete")
-        Tabel::Delete(query);
-      else if (comandaQuery == "select")
-        Tabel::Select(query);
-      else if (comandaQuery == "update")
-        Tabel::Update(query);
-      else
-        cout << "Comanda query-ului nu este suportata";
-    }
+    Query::parseazaQueryuri(clasaDeStudenti, input);
   }
 
   return 0;
