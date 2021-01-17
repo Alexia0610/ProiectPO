@@ -1,0 +1,3 @@
+id_curs, integer, 3
+nume_curs, text, 25
+locatie, text, 25

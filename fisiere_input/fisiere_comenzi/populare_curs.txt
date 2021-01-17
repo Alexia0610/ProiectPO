@@ -1,0 +1,2 @@
+INSERT INTO curs VALUES (1, "baze de date", "cladirea 3")
+INSERT INTO curs VALUES (2, "programare orientata obiect", "cladirea 2")

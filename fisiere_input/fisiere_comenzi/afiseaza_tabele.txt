@@ -1,0 +1,6 @@
+select all from student;
+select (nume_student, curs) from student where varsta = 24;
+update student set varsta = 20 where varsta = 24;
+select (varsta, curs) from student;
+delete from curs where id_curs = 1;
+select all from curs;

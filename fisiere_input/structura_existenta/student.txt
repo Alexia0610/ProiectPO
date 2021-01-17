@@ -1,0 +1,4 @@
+nume_student, text, 25
+varsta, integer, 2
+curs, text, 30, "programare orientata obiect"
+varsta, integer, 2
